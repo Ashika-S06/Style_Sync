@@ -1,0 +1,365 @@
+:root {
+  --bg-primary: #fdf5f3;        /* Soft peachy background */
+  --bg-card: #ffffff;           /* White card background */
+  --bg-secondary: #fceceb;      /* Slightly darker peach for hover */
+  --text-main: #3a2e2d;         /* Soft dark for primary text */
+  --text-muted: #8b7d7b;        /* Muted brown/gray for secondary text */
+  --accent-color: #ff8591;      /* Bright, soft pink/red accent */
+  --accent-hover: #ff6b7a;      /* Darker pink for hover */
+  --border-color: rgba(255, 133, 145, 0.15);
+  
+  --shadow-soft: 0 10px 40px rgba(255, 133, 145, 0.08);
+  --shadow-hover: 0 15px 50px rgba(255, 133, 145, 0.15);
+  --radius-pill: 9999px;
+  --radius-card: 24px;
+  --radius-oval: 150px;         /* For the huge image cutouts */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .brand-font {
+  font-family: 'Lora', Georgia, serif;
+}
+
+/* Base style for decorative elements representing the floating leaves/dots */
+body::before, body::after {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--accent-color);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+/* Redesigned Cards */
+.glass-panel {
+  /* Replacing glassmorphism with soft, solid floating cards */
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.glass-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Base Layout */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* Modern Buttons (Pill shaped) */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+  color: white;
+  padding: 14px 28px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(255, 133, 145, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 133, 145, 0.4);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--accent-color);
+  border: 2px solid var(--accent-color);
+  padding: 12px 26px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-secondary);
+  transform: translateY(-2px);
+}
+
+/* Forms (Pill inputs) */
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-main);
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin-left: 12px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 24px;
+  background: #ffffff;
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  color: var(--text-main);
+  font-size: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 15px rgba(255, 133, 145, 0.15);
+}
+
+/* Grid Layouts */
+.grid-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 32px;
+  margin-top: 40px;
+}
+
+/* Navbar Update for Soft Theme */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 24px 0;
+  background: rgba(253, 245, 243, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand {
+  font-family: 'Lora', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  letter-spacing: -0.5px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  font-weight: 500;
+}
+
+.nav-links a.active {
+  color: var(--accent-color);
+  position: relative;
+}
+.nav-links a.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent-color);
+  border-radius: 2px;
+}
+
+/* Page Headers using Lora */
+.page-header {
+  margin-top: 60px;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.page-title span {
+  color: var(--accent-color);
+}
+
+.page-subtitle {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Oval Image Hero specific to this aesthetic */
+.hero-oval {
+  border-radius: var(--radius-oval) var(--radius-oval) 20px 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  height: 500px;
+  width: 100%;
+}
+
+.hero-oval img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Overriding any text white from previous theme */
+/* Magazine / Editorial Lookbook Layout */
+.magazine-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px 40px;
+  background-color: white; /* Clean white for the 'spread' */
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.05);
+  min-height: 100vh;
+  position: relative;
+}
+
+.magazine-header {
+  border-bottom: 2px solid #000;
+  margin-bottom: 100px;
+  padding-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.magazine-title {
+  font-family: 'Lora', serif;
+  font-size: 8rem;
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 0.8;
+  text-transform: uppercase;
+  margin: 0;
+  color: #000;
+}
+
+.magazine-brand {
+  font-family: 'Lora', serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent-color);
+}
+
+.magazine-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: minmax(100px, auto);
+  gap: 60px;
+  margin-top: 60px;
+}
+
+/* Specific editorial card styles */
+.editorial-item {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.editorial-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 0.6s ease, transform 0.6s ease;
+}
+
+.editorial-item:hover img {
+  transform: scale(1.05);
+  filter: grayscale(0.2);
+}
+
+.editorial-label {
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #777;
+  margin-top: 15px;
+  display: block;
+}
+
+.editorial-caption {
+  font-family: 'Lora', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  margin-top: 5px;
+  color: #000;
+  line-height: 1.4;
+}
+
+.magazine-description {
+  grid-column: span 4;
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: #333;
+  padding-right: 40px;
+  align-self: end;
+  border-left: 1px solid #eee;
+  padding-left: 40px;
+}
+
+/* Layout Variations */
+.col-span-8 { grid-column: span 8; }
+.col-span-6 { grid-column: span 6; }
+.col-span-4 { grid-column: span 4; }
+.col-span-3 { grid-column: span 3; }
+
+.row-span-2 { grid-row: span 2; }
+.row-span-3 { grid-row: span 3; }
+
+@media (max-width: 1024px) {
+  .magazine-title { font-size: 5rem; }
+  .magazine-grid { gap: 30px; }
+  .magazine-description { grid-column: span 6; padding: 20px; }
+  .col-span-8, .col-span-6, .col-span-4, .col-span-3 { grid-column: span 12; }
+}
