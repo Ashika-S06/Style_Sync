@@ -19,7 +19,12 @@ function Navbar() {
         <div className="nav-links">
           {user ? (
             <>
-              <Link to="/" className="btn-secondary" style={{ marginRight: '16px' }}>Home</Link>
+              <Link to="/">Feed</Link>
+              <Link to="/wardrobe">Wardrobe</Link>
+              <Link to="/collections">Outfits</Link>
+              <Link to="/ai-lookbook" className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.9rem' }}>
+                ✨ AI Lookbook
+              </Link>
               <Link to="/profile">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)' }}>
                   <User size={20} />
