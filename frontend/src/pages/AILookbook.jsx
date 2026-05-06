@@ -7,42 +7,49 @@ function AILookbook() {
   const [lookbook, setLookbook] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [wardrobe, setWardrobe] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [selectedCollection, setSelectedCollection] = useState(null);
   const [publishing, setPublishing] = useState(false);
+  const [recommendations, setRecommendations] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchWardrobe = async () => {
+    const fetchCollections = async () => {
       try {
-        const res = await api.get('/wardrobe');
-        setWardrobe(res.data);
+        const res = await api.get('/collections');
+        setCollections(res.data);
       } catch (err) {
-        console.error('Failed to fetch wardrobe', err);
+        console.error('Failed to fetch collections', err);
       }
     };
-    fetchWardrobe();
+    const fetchRecommendations = async () => {
+      try {
+        const res = await api.get('/recommendations');
+        setRecommendations(res.data);
+      } catch (err) {
+        console.error('Failed to fetch recommendations', err);
+      }
+    };
+    fetchCollections();
+    fetchRecommendations();
   }, []);
 
-  const toggleItemSelection = (id) => {
-    if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter(i => i !== id));
-    } else {
-      setSelectedItems([...selectedItems, id]);
-    }
-  };
-
   const generateLookbook = async () => {
+    if (!selectedCollection) {
+      alert("Please select an outfit to generate a lookbook.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const res = await api.post('/ai/generate-lookbook', { 
-        selectedItemIds: selectedItems 
+        collectionId: selectedCollection._id,
+        collectionName: selectedCollection.name
       });
       setLookbook(res.data);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.msg || 'Failed to generate lookbook. Make sure you have at least 2 items in your wardrobe.');
+      setError(err.response?.data?.msg || 'Failed to generate lookbook. Make sure the outfit has at least 2 items.');
     } finally {
       setLoading(false);
     }
@@ -81,37 +88,42 @@ function AILookbook() {
             Select items or let our AI analyze your entire collection.
           </p>
 
+          {recommendations && (
+            <div style={{ background: '#fdf5f3', borderRadius: '16px', padding: '24px', marginBottom: '40px', border: '1px solid #fbd9d3', textAlign: 'left' }}>
+              <h3 style={{ margin: '0 0 12px 0', color: 'var(--accent-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sparkles size={20} /> Pre-styling Insights
+              </h3>
+              <p style={{ fontSize: '1rem', color: '#444', lineHeight: 1.5, margin: 0 }}>{recommendations.advice}</p>
+            </div>
+          )}
+
           <div style={{ marginBottom: '40px' }}>
             <h3 style={{ fontFamily: 'Lora', marginBottom: '16px', fontSize: '1.2rem' }}>
-              Select pieces to style (Optional)
+              Select an Outfit to style
             </h3>
-            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', padding: '10px 0', justifyContent: 'center' }}>
-              {wardrobe.map(item => (
+            <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', padding: '10px 0', justifyContent: 'center' }}>
+              {collections.map(collection => (
                 <div 
-                  key={item._id}
-                  onClick={() => toggleItemSelection(item._id)}
+                  key={collection._id}
+                  onClick={() => setSelectedCollection(collection)}
                   style={{
-                    minWidth: '80px', height: '80px', borderRadius: '50%',
-                    backgroundImage: `url(http://localhost:5000${item.image})`,
-                    backgroundSize: 'cover', backgroundPosition: 'center',
+                    minWidth: '120px', padding: '16px', borderRadius: '16px',
+                    background: selectedCollection?._id === collection._id ? 'var(--accent-color)' : '#fff',
+                    color: selectedCollection?._id === collection._id ? '#fff' : '#333',
                     cursor: 'pointer',
-                    border: selectedItems.includes(item._id) ? '4px solid var(--accent-color)' : '2px solid transparent',
+                    border: '1px solid #ddd',
                     transition: 'all 0.2s ease',
-                    transform: selectedItems.includes(item._id) ? 'scale(1.1)' : 'scale(1)',
-                    position: 'relative'
+                    transform: selectedCollection?._id === collection._id ? 'scale(1.05)' : 'scale(1)',
+                    boxShadow: selectedCollection?._id === collection._id ? '0 4px 15px rgba(0,0,0,0.2)' : 'none',
+                    textAlign: 'center'
                   }}
                 >
-                  {selectedItems.includes(item._id) && (
-                    <div style={{ position: 'absolute', bottom: '0', right: '0', background: 'white', borderRadius: '50%' }}>
-                      <CheckCircle size={16} color="var(--accent-color)" />
-                    </div>
-                  )}
+                  <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '8px' }}>{collection.name}</div>
+                  <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>{collection.items?.length || 0} items</div>
                 </div>
               ))}
+              {collections.length === 0 && <p style={{ color: '#888' }}>No outfits found. Go to Collections to create one.</p>}
             </div>
-            <p style={{ fontSize: '0.85rem', color: '#888', marginTop: '8px' }}>
-              {selectedItems.length > 0 ? `${selectedItems.length} items picked` : 'Or just click curate for a surprise'}
-            </p>
           </div>
 
           <button className="btn-primary" onClick={generateLookbook} style={{ padding: '20px 40px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px', margin: '0 auto' }}>
@@ -159,47 +171,83 @@ function AILookbook() {
         </div>
       ) : (
         <>
-          <div className="magazine-grid">
-            {/* The Main Editorial Copy */}
-            <div className="magazine-description">
-               <p style={{ fontStyle: 'italic', color: '#000', marginBottom: '30px', fontSize: '1.4rem' }}>
-                  "{lookbook.description}"
-               </p>
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                 <button className="btn-secondary" onClick={generateLookbook} style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                   <RefreshCw size={18} /> REGENERATE SPREAD
-                 </button>
-                 <button 
-                  className="btn-primary" 
-                  onClick={handlePublish} 
-                  disabled={publishing}
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
-                 >
-                   <Globe size={18} /> {publishing ? 'PUBLISHING...' : 'PUBLISH TO FEED'}
-                 </button>
-               </div>
-            </div>
+          <div className="magazine-layout-spread" style={{ display: 'flex', flexDirection: 'column', gap: '60px', marginTop: '40px' }}>
+            {(() => {
+              const paras = lookbook.description ? lookbook.description.split('\n\n') : [];
+              const items = lookbook.items || [];
+              const maxRows = Math.max(paras.length, items.length);
+              const rows = [];
+              
+              for (let i = 0; i < maxRows; i++) {
+                const isEven = i % 2 === 0;
+                rows.push(
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', alignItems: 'center' }}>
+                    {isEven ? (
+                      <>
+                        <div style={{ fontSize: '1.2rem', lineHeight: '1.7', color: '#333' }}>
+                          {paras[i] || ""}
+                        </div>
+                        {items[i] && (
+                          <div style={{ background: '#fafafa', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
+                            <img src={`http://localhost:5000${items[i].image}`} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
+                            <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>STYLING NO. {i+1}</div>
+                            <div className="editorial-caption" style={{ marginTop: '5px' }}>
+                              {items[i].brand ? <strong>{items[i].brand.toUpperCase()}</strong> : 'ARCHIVAL'} / {items[i].category.toUpperCase()}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {items[i] && (
+                          <div style={{ background: '#fafafa', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
+                            <img src={`http://localhost:5000${items[i].image}`} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
+                            <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>STYLING NO. {i+1}</div>
+                            <div className="editorial-caption" style={{ marginTop: '5px' }}>
+                              {items[i].brand ? <strong>{items[i].brand.toUpperCase()}</strong> : 'ARCHIVAL'} / {items[i].category.toUpperCase()}
+                            </div>
+                          </div>
+                        )}
+                        <div style={{ fontSize: '1.2rem', lineHeight: '1.7', color: '#333' }}>
+                          {paras[i] || ""}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              }
+              
+              if (items.length > paras.length) {
+                const leftovers = items.slice(paras.length);
+                if (leftovers.length > 0) {
+                  rows.push(
+                    <div key="leftovers" style={{ display: 'grid', gridTemplateColumns: `repeat(${leftovers.length}, 1fr)`, gap: '20px' }}>
+                      {leftovers.map((item, idx) => (
+                        <div key={idx} style={{ background: '#fafafa', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
+                           <img src={`http://localhost:5000${item.image}`} style={{ width: '100%', height: '300px', objectFit: 'contain' }} alt="look" />
+                        </div>
+                      ))}
+                    </div>
+                  );
+                }
+              }
+              
+              return rows;
+            })()}
 
-            {/* Asymmetric Grid Items */}
-            {lookbook.items.map((item, index) => (
-              <div 
-                key={item._id} 
-                className={`editorial-item ${
-                  index % 3 === 0 ? 'col-span-8 row-span-3' : 'col-span-4 row-span-2'
-                }`}
-                style={{ 
-                  height: index % 3 === 0 ? '800px' : '450px',
-                  marginTop: index === 1 ? '100px' : '0'
-                }}
-              >
-                <img src={`http://localhost:5000${item.image}`} alt={item.category} />
-                <span className="editorial-label">STYLING NO. {index + 1}</span>
-                <div className="editorial-caption">
-                  {item.brand ? <strong>{item.brand.toUpperCase()}</strong> : 'ARCHIVAL'} / {item.category.toUpperCase()}
-                  <div style={{ color: '#888', fontStyle: 'normal', fontSize: '0.85rem' }}>Core Essential in {item.color}</div>
-                </div>
-              </div>
-            ))}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '60px' }}>
+                <button className="btn-secondary" onClick={generateLookbook} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}>
+                  <RefreshCw size={18} /> REGENERATE SPREAD
+                </button>
+                <button 
+                className="btn-primary" 
+                onClick={handlePublish} 
+                disabled={publishing}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
+                >
+                  <Globe size={18} /> {publishing ? 'PUBLISHING...' : 'PUBLISH TO FEED'}
+                </button>
+            </div>
           </div>
 
           <div style={{ padding: '100px 0', textAlign: 'center', borderTop: '1px solid #eee', marginTop: '100px' }}>

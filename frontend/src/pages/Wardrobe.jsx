@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 
 function Wardrobe() {
   const [items, setItems] = useState([]);
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [recommendations, setRecommendations] = useState(null);
   const navigate = useNavigate();
 
   // Form states
@@ -35,8 +36,18 @@ function Wardrobe() {
     }
   };
 
+  const fetchRecommendations = async () => {
+    try {
+      const res = await api.get('/recommendations');
+      setRecommendations(res.data);
+    } catch (error) {
+      console.error('Failed to fetch recommendations', error);
+    }
+  };
+
   useEffect(() => {
     fetchItems();
+    fetchRecommendations();
   }, []);
 
   const handleAddItem = async (e) => {
@@ -138,6 +149,21 @@ function Wardrobe() {
           <Plus size={20} /> Add Item
         </button>
       </div>
+
+      {recommendations && (
+        <div style={{ background: '#fdf5f3', borderRadius: '16px', padding: '24px', marginBottom: '24px', border: '1px solid #fbd9d3' }}>
+          <h3 style={{ margin: '0 0 12px 0', color: 'var(--accent-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Sparkles size={20} /> AI Stylist Advice
+          </h3>
+          <p style={{ fontSize: '1rem', color: '#444', lineHeight: 1.5, marginBottom: '16px' }}>{recommendations.advice}</p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#666', alignSelf: 'center' }}>Missing Pieces:</span>
+            {recommendations.missingPieces?.map((piece, i) => (
+              <span key={i} style={{ background: 'white', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', color: 'var(--accent-color)', fontWeight: 600, border: '1px solid #fbd9d3' }}>+ {piece}</span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="glass-panel" style={{ padding: '24px', marginBottom: '32px' }}>

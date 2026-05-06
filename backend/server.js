@@ -26,6 +26,8 @@ app.use('/api/lookbooks', require('./routes/lookbooks'));
 app.use('/api/wardrobe', require('./routes/wardrobe'));
 app.use('/api/collections', require('./routes/collections'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/trends', require('./routes/trends'));
+app.use('/api/recommendations', require('./routes/recommendations'));
 
 const PORT = process.env.PORT || 5000;
 

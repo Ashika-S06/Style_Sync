@@ -15,7 +15,7 @@ const createLookbook = async (req, res) => {
       items: items || [],
       image: req.file ? '/uploads/' + req.file.filename : (image || '')
     });
-    const populated = await Lookbook.findById(lookbook._id).populate('user', 'username profilePic').populate('items');
+    const populated = await Lookbook.findById(lookbook._id).populate('user', 'username profilePic').populate('items').populate('comments.user', 'username profilePic');
     res.status(201).json(populated);
   } catch (error) {
     res.status(400).json({ message: 'Failed to create lookbook', error: error.message });
@@ -27,9 +27,10 @@ const createLookbook = async (req, res) => {
 // @access  Public
 const getLookbooks = async (req, res) => {
   try {
-    const lookbooks = await Lookbook.find()
+    const lookbooks = await Lookbook.find({ isDeleted: { $ne: true } })
       .populate('user', 'username profilePic')
       .populate('items')
+      .populate('comments.user', 'username profilePic')
       .sort({ createdAt: -1 });
     res.json(lookbooks);
   } catch (error) {
@@ -90,8 +91,9 @@ const deleteLookbook = async (req, res) => {
       return res.status(401).json({ message: 'User not authorized' });
     }
     
-    await lookbook.deleteOne();
-    res.json({ id: req.params.id });
+    lookbook.isDeleted = true;
+    await lookbook.save();
+    res.json({ id: req.params.id, message: 'Lookbook soft deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
