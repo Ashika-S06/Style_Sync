@@ -1,8 +1,5 @@
 const WardrobeItem = require('../models/WardrobeItem');
 
-// @desc    Get user's wardrobe items
-// @route   GET /api/wardrobe
-// @access  Private
 const getWardrobeItems = async (req, res) => {
   try {
     const items = await WardrobeItem.find({ user: req.user.id }).sort({ createdAt: -1 });
@@ -12,9 +9,6 @@ const getWardrobeItems = async (req, res) => {
   }
 };
 
-// @desc    Add item to wardrobe
-// @route   POST /api/wardrobe
-// @access  Private
 const createWardrobeItem = async (req, res) => {
   try {
     const { category, color, brand, notes, image } = req.body;
@@ -34,9 +28,6 @@ const createWardrobeItem = async (req, res) => {
   }
 };
 
-// @desc    Update wardrobe item
-// @route   PUT /api/wardrobe/:id
-// @access  Private
 const updateWardrobeItem = async (req, res) => {
   try {
     const item = await WardrobeItem.findById(req.params.id);
@@ -54,9 +45,6 @@ const updateWardrobeItem = async (req, res) => {
   }
 };
 
-// @desc    Delete wardrobe item
-// @route   DELETE /api/wardrobe/:id
-// @access  Private
 const deleteWardrobeItem = async (req, res) => {
   try {
     const item = await WardrobeItem.findById(req.params.id);

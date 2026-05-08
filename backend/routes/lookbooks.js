@@ -14,7 +14,6 @@ const { protect } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 
-// Multer config for local storage
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, 'uploads/');

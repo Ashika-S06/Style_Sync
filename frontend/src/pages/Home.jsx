@@ -1,12 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 import AuthContext from '../context/AuthContext';
-import { Star, X } from 'lucide-react';
+import { Star, X, MessageCircle, Send, TrendingUp, Trash2 } from 'lucide-react';
 
 function Home() {
   const [lookbooks, setLookbooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedLookbook, setSelectedLookbook] = useState(null);
+  const [trendsData, setTrendsData] = useState(null);
+  const [loadingTrends, setLoadingTrends] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [expandedCommentsId, setExpandedCommentsId] = useState(null);
   const { user } = useContext(AuthContext);
 
   const fetchLookbooks = async () => {
@@ -20,9 +24,24 @@ function Home() {
     }
   };
 
+  const fetchTrends = async () => {
+    try {
+      setLoadingTrends(true);
+      const res = await api.get('/trends');
+      setTrendsData(res.data);
+    } catch (error) {
+      console.error('Failed to fetch trends', error);
+    } finally {
+      setLoadingTrends(false);
+    }
+  };
+
   useEffect(() => {
     fetchLookbooks();
-  }, []);
+    if (user) {
+      fetchTrends();
+    }
+  }, [user]);
 
   const handleRate = async (e, id, score) => {
     e.stopPropagation();
@@ -38,17 +57,34 @@ function Home() {
     }
   };
 
-  const handleWear = async (e, id, answer) => {
-    e.stopPropagation();
-    if (!user) return alert("Please log in to vote.");
+  const handleComment = async (e, id) => {
+    e.preventDefault();
+    if (!user) return alert("Please log in to comment.");
+    if (!commentText.trim()) return;
     try {
-      const res = await api.post(`/lookbooks/${id}/wear`, { answer });
-      setLookbooks(lookbooks.map(lb => lb._id === id ? { ...lb, wouldWear: res.data } : lb));
+      const res = await api.post(`/lookbooks/${id}/comment`, { text: commentText });
+      setLookbooks(lookbooks.map(lb => lb._id === id ? { ...lb, comments: res.data } : lb));
       if (selectedLookbook && selectedLookbook._id === id) {
-        setSelectedLookbook({ ...selectedLookbook, wouldWear: res.data });
+        setSelectedLookbook({ ...selectedLookbook, comments: res.data });
       }
+      setCommentText("");
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleDeleteLookbook = async (e, id) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this lookbook?")) return;
+    try {
+      await api.delete(`/lookbooks/${id}`);
+      setLookbooks(lookbooks.filter(lb => lb._id !== id));
+      if (selectedLookbook && selectedLookbook._id === id) {
+        setSelectedLookbook(null);
+      }
+    } catch (err) {
+      console.error('Failed to delete lookbook', err);
+      alert('Failed to delete lookbook');
     }
   };
 
@@ -58,22 +94,19 @@ function Home() {
     return Math.round((sum / ratings.length) * 10) / 10;
   };
 
-  const getWearPercentage = (wouldWear = []) => {
-    if (wouldWear.length === 0) return 0;
-    const yesCount = wouldWear.filter(w => w.answer === true).length;
-    return Math.round((yesCount / wouldWear.length) * 100);
+  const toggleComments = (e, id) => {
+    e.stopPropagation();
+    setExpandedCommentsId(prev => prev === id ? null : id);
   };
 
-  const renderFeedback = (lb) => {
+  const renderFeedback = (lb, isMagazineView = false) => {
     const avg = getAvgRating(lb.ratings);
-    const wearPct = getWearPercentage(lb.wouldWear);
-    
     const myRating = user ? lb.ratings?.find(r => r.user === user._id || r.user?._id === user._id)?.score : null;
-    const myWear = user ? lb.wouldWear?.find(w => w.user === user._id || w.user?._id === user._id)?.answer : null;
+    const showComments = isMagazineView || expandedCommentsId === lb._id;
 
     return (
       <div style={{ marginTop: '16px', borderTop: '1px solid #eee', paddingTop: '16px' }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
             <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
               {[1,2,3,4,5].map(star => (
@@ -89,29 +122,40 @@ function Home() {
             </div>
             <span style={{ fontSize: '0.8rem', color: '#888' }}>{avg > 0 ? `${avg} / 5 (${lb.ratings?.length || 0})` : 'No ratings'}</span>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>
-              👗 Would You Wear This?
-            </span>
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-              <button 
-                onClick={(e) => handleWear(e, lb._id, true)}
-                style={{ padding: '6px 14px', borderRadius: '12px', background: myWear === true ? 'var(--accent-color)' : '#f0f0f0', color: myWear === true ? 'white' : '#555', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                YES
-              </button>
-              <button 
-                onClick={(e) => handleWear(e, lb._id, false)}
-                style={{ padding: '6px 14px', borderRadius: '12px', background: myWear === false ? '#666' : '#f0f0f0', color: myWear === false ? 'white' : '#555', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                NO
-              </button>
-            </div>
-            {wearPct > 0 && (
-              <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '6px' }}>
-                 {wearPct}% said yes
-              </div>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#666', cursor: 'pointer', background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: '20px' }} onClick={(e) => toggleComments(e, lb._id)}>
+            <MessageCircle size={18} />
+            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{lb.comments?.length || 0} Comments</span>
           </div>
         </div>
+
+        {showComments && (
+          <div style={{ marginTop: '16px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {lb.comments && lb.comments.length > 0 ? (
+                lb.comments.map((comment, idx) => (
+                  <div key={idx} style={{ background: '#fff', padding: '12px', borderRadius: '8px', border: '1px solid #eee' }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '4px', color: 'var(--text-main)' }}>@{comment.user?.username || 'user'}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#444' }}>{comment.text}</div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ fontSize: '0.9rem', color: '#888', fontStyle: 'italic' }}>No comments yet. Be the first to share your thoughts!</div>
+              )}
+            </div>
+            <form onSubmit={(e) => handleComment(e, lb._id)} style={{ display: 'flex', gap: '8px' }}>
+              <input
+                type="text"
+                placeholder="Add a comment..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                style={{ flex: 1, padding: '10px 14px', borderRadius: '20px', border: '1px solid #ccc', outline: 'none', fontSize: '0.9rem' }}
+              />
+              <button type="submit" disabled={!commentText.trim()} style={{ background: 'var(--accent-color)', color: 'white', border: 'none', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: commentText.trim() ? 'pointer' : 'not-allowed', opacity: commentText.trim() ? 1 : 0.5 }}>
+                <Send size={18} style={{ marginLeft: '-2px' }} />
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     );
   };
@@ -122,6 +166,42 @@ function Home() {
         <h1 className="page-title">Discover <span>New Styles</span></h1>
         <p className="page-subtitle">Curated fashion lookbooks from our community.</p>
       </div>
+
+      {user && trendsData && (
+        <div style={{ background: 'linear-gradient(135deg, #111, #333)', borderRadius: '24px', padding: '32px', marginBottom: '40px', color: 'white', position: 'relative', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.15)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ background: 'var(--accent-color)', padding: '10px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <TrendingUp size={24} color="white" />
+            </div>
+            <h2 style={{ fontSize: '1.8rem', margin: 0, fontWeight: 700, letterSpacing: '-0.5px' }}>Live Trends & Insights</h2>
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {trendsData.trends?.map((trend, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {trend.colorHex && <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: trend.colorHex }}></div>}
+                    <h3 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 600 }}>{trend.name}</h3>
+                  </div>
+                  <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)' }}>{trend.engagementScore}% Popularity</span>
+                </div>
+                <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '16px' }}>{trend.description}</div>
+                
+                {/* Bar Graph */}
+                <div style={{ width: '100%', height: '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    height: '100%', 
+                    width: `${trend.engagementScore || 50}%`, 
+                    background: trend.colorHex || 'var(--accent-color)',
+                    transition: 'width 1s ease-out'
+                  }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       
       {loading ? (
         <div style={{ textAlign: 'center', marginTop: '40px', color: 'var(--text-muted)' }}>Loading the latest trends...</div>
@@ -149,8 +229,16 @@ function Home() {
                     <span style={{ fontSize: '0.9rem', color: 'var(--accent-color)', fontWeight: '600' }}>
                       @{post.user?.username || 'user'}
                     </span>
+                    {user && user._id === post.user?._id && (
+                      <Trash2 
+                        size={18} 
+                        color="#ff4d4d" 
+                        style={{ cursor: 'pointer' }} 
+                        onClick={(e) => handleDeleteLookbook(e, post._id)} 
+                      />
+                    )}
                   </div>
-                  {renderFeedback(post)}
+                  {renderFeedback(post, false)}
                 </div>
               </div>
             ))
@@ -182,44 +270,69 @@ function Home() {
                 </div>
               </div>
 
-              <div className="magazine-grid">
-                <div className="magazine-description" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                   <p style={{ fontStyle: 'italic', color: '#000', fontSize: '1.4rem' }}>
-                      "{selectedLookbook.description}"
-                   </p>
-                   
-                   <div style={{ background: '#fdf5f3', padding: '24px', borderRadius: '16px', marginTop: '20px' }}>
-                     <h4 style={{ marginBottom: '16px', fontFamily: 'Outfit', fontWeight: 600, fontSize: '1.2rem' }}>Feedback</h4>
-                     {renderFeedback(selectedLookbook)}
-                   </div>
+              <div className="magazine-layout-spread" style={{ display: 'flex', flexDirection: 'column', gap: '60px' }}>
+                {(() => {
+                  const paras = selectedLookbook.description ? selectedLookbook.description.split('\n\n') : [];
+                  const items = selectedLookbook.items || [];
+                  const maxRows = Math.max(paras.length, items.length);
+                  const rows = [];
+                  
+                  for (let i = 0; i < maxRows; i++) {
+                    const isEven = i % 2 === 0;
+                    rows.push(
+                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', alignItems: 'center' }}>
+                        {isEven ? (
+                          <>
+                            <div style={{ fontSize: '1.2rem', lineHeight: '1.7', color: '#333' }}>
+                              {paras[i] || ""}
+                            </div>
+                            {items[i] && (
+                              <div style={{ background: '#fafafa', padding: '20px', borderRadius: '8px' }}>
+                                <img src={`http://localhost:5000${items[i].image}`} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
+                                <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>STYLING NO. {i+1}</div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            {items[i] && (
+                              <div style={{ background: '#fafafa', padding: '20px', borderRadius: '8px' }}>
+                                <img src={`http://localhost:5000${items[i].image}`} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
+                                <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>STYLING NO. {i+1}</div>
+                              </div>
+                            )}
+                            <div style={{ fontSize: '1.2rem', lineHeight: '1.7', color: '#333' }}>
+                              {paras[i] || ""}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
+                  
+                  // If there are leftover items, show them side by side
+                  if (items.length > paras.length) {
+                    const leftovers = items.slice(paras.length);
+                    if (leftovers.length > 0) {
+                      rows.push(
+                        <div key="leftovers" style={{ display: 'grid', gridTemplateColumns: `repeat(${leftovers.length}, 1fr)`, gap: '20px' }}>
+                          {leftovers.map((item, idx) => (
+                            <div key={idx} style={{ background: '#fafafa', padding: '20px', borderRadius: '8px' }}>
+                               <img src={`http://localhost:5000${item.image}`} style={{ width: '100%', height: '300px', objectFit: 'contain' }} alt="look" />
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+                  }
+                  
+                  return rows;
+                })()}
+                
+                <div style={{ background: '#fdf5f3', padding: '32px', borderRadius: '24px', marginTop: '40px' }}>
+                  <h4 style={{ marginBottom: '20px', fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.5rem' }}>Community Feedback</h4>
+                  {renderFeedback(selectedLookbook, true)}
                 </div>
-
-                {selectedLookbook.items && selectedLookbook.items.length > 0 ? (
-                  selectedLookbook.items.map((item, index) => (
-                    <div 
-                      key={item._id} 
-                      className={`editorial-item ${
-                        index % 3 === 0 ? 'col-span-8 row-span-3' : 'col-span-4 row-span-2'
-                      }`}
-                      style={{ 
-                        height: index % 3 === 0 ? '800px' : '450px',
-                        marginTop: index === 1 ? '100px' : '0'
-                      }}
-                    >
-                      <div style={{ width: '100%', height: '100%', backgroundColor: '#fafafa', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                         <img src={`http://localhost:5000${item.image}`} alt={item.category || 'item'} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                      </div>
-                      <span className="editorial-label">STYLING NO. {index + 1}</span>
-                      <div className="editorial-caption">
-                        {item.brand ? <strong>{item.brand.toUpperCase()}</strong> : 'ARCHIVAL'} / {item.category?.toUpperCase() || 'ITEM'}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-12" style={{ height: '800px', backgroundColor: '#fafafa', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <img src={`http://localhost:5000${selectedLookbook.image}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} alt="Main Look" />
-                  </div>
-                )}
               </div>
            </div>
         </div>

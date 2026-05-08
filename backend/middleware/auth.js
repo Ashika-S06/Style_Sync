@@ -11,8 +11,7 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
       
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretcode');
-      // We assume user id is stored in token as 'id'
-      req.user = decoded; // we just pass the decoded payload
+      req.user = decoded;
 
       next();
     } catch (error) {

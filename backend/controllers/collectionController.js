@@ -1,8 +1,5 @@
 const Collection = require('../models/Collection');
 
-// @desc    Get user's collections
-// @route   GET /api/collections
-// @access  Private
 const getCollections = async (req, res) => {
   try {
     const collections = await Collection.find({ user: req.user.id }).populate('items').sort({ createdAt: -1 });
@@ -12,12 +9,9 @@ const getCollections = async (req, res) => {
   }
 };
 
-// @desc    Create new collection
-// @route   POST /api/collections
-// @access  Private
 const createCollection = async (req, res) => {
   try {
-    const { name, items } = req.body; // items is array of wardrobe item IDs
+    const { name, items } = req.body;
     
     const collection = await Collection.create({
       user: req.user.id,
@@ -31,9 +25,6 @@ const createCollection = async (req, res) => {
   }
 };
 
-// @desc    Update collection
-// @route   PUT /api/collections/:id
-// @access  Private
 const updateCollection = async (req, res) => {
   try {
     const collection = await Collection.findById(req.params.id);
@@ -51,9 +42,6 @@ const updateCollection = async (req, res) => {
   }
 };
 
-// @desc    Delete collection
-// @route   DELETE /api/collections/:id
-// @access  Private
 const deleteCollection = async (req, res) => {
   try {
     const collection = await Collection.findById(req.params.id);

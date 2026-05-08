@@ -14,7 +14,7 @@ const lookbookSchema = new mongoose.Schema({
     type: String
   },
   image: {
-    type: String, // Store URL or path to image
+    type: String,
     required: false
   },
   items: [{
@@ -45,7 +45,11 @@ const lookbookSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
-  }]
+  }],
+  isDeleted: {
+    type: Boolean,
+    default: false
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Lookbook', lookbookSchema);

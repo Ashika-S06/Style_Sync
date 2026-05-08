@@ -1,16 +1,12 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Generate JWT
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'secretcode', {
     expiresIn: '30d',
   });
 };
 
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
 const registerUser = async (req, res) => {
   try {
     const { username, password, bio } = req.body;
@@ -25,7 +21,6 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Hash is handled in the pre-save middleware in User model
     const user = await User.create({
       username,
       password,
@@ -47,9 +42,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Authenticate a user
-// @route   POST /api/auth/login
-// @access  Public
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;

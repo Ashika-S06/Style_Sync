@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const { analyzeTrendsAndRecommendations } = require('../controllers/aiController');
 const { protect } = require('../middleware/auth');
-const aiController = require('../controllers/aiController');
 
-router.post('/generate-lookbook', protect, aiController.generateLookbook);
+router.get('/', protect, analyzeTrendsAndRecommendations);
 
 module.exports = router;

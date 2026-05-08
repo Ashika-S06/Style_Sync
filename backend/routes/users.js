@@ -2,9 +2,6 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 
-// @desc    Get user profile
-// @route   GET /api/users/:id
-// @access  Public (or protected if preferred)
 router.get('/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
