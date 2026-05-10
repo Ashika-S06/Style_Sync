@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
+import api, { BASE_URL, getImageUrl } from '../services/api';
 import { Sparkles, RefreshCw, ArrowLeft, Bookmark, CheckCircle, Globe } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -187,7 +187,7 @@ function AILookbook() {
                         </div>
                         {items[i] && (
                           <div style={{ background: '#fafafa', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
-                            <img src={`http://localhost:5000${items[i].image}`} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
+                            <img src={getImageUrl(items[i].image)} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
                             <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>STYLING NO. {i+1}</div>
                             <div className="editorial-caption" style={{ marginTop: '5px' }}>
                               {items[i].brand ? <strong>{items[i].brand.toUpperCase()}</strong> : 'ARCHIVAL'} / {items[i].category.toUpperCase()}
@@ -199,7 +199,7 @@ function AILookbook() {
                       <>
                         {items[i] && (
                           <div style={{ background: '#fafafa', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
-                            <img src={`http://localhost:5000${items[i].image}`} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
+                            <img src={getImageUrl(items[i].image)} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
                             <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>STYLING NO. {i+1}</div>
                             <div className="editorial-caption" style={{ marginTop: '5px' }}>
                               {items[i].brand ? <strong>{items[i].brand.toUpperCase()}</strong> : 'ARCHIVAL'} / {items[i].category.toUpperCase()}
@@ -222,7 +222,7 @@ function AILookbook() {
                     <div key="leftovers" style={{ display: 'grid', gridTemplateColumns: `repeat(${leftovers.length}, 1fr)`, gap: '20px' }}>
                       {leftovers.map((item, idx) => (
                         <div key={idx} style={{ background: '#fafafa', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
-                           <img src={`http://localhost:5000${item.image}`} style={{ width: '100%', height: '300px', objectFit: 'contain' }} alt="look" />
+                           <img src={getImageUrl(item.image)} style={{ width: '100%', height: '300px', objectFit: 'contain' }} alt="look" />
                         </div>
                       ))}
                     </div>

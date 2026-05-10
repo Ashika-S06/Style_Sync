@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import api from '../services/api';
+import api, { BASE_URL, getImageUrl } from '../services/api';
 import AuthContext from '../context/AuthContext';
 import { Star, X, MessageCircle, Send, TrendingUp, Trash2 } from 'lucide-react';
 
@@ -213,13 +213,13 @@ function Home() {
                 {post.items && post.items.length > 0 ? (
                   <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gridTemplateRows: '160px 160px', gap: '4px', height: '320px', overflow: 'hidden', borderTopLeftRadius: 'var(--radius-card)', borderTopRightRadius: 'var(--radius-card)' }}>
                     <div style={{ gridRow: 'span 2' }}>
-                      <img src={`http://localhost:5000${post.items[0].image}`} alt="main" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={getImageUrl(post.items[0].image)} alt="main" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
-                    {post.items[1] && <img src={`http://localhost:5000${post.items[1].image}`} alt="side 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                    {post.items[2] ? <img src={`http://localhost:5000${post.items[2].image}`} alt="side 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--accent-color)', fontWeight: 'bold' }}>STYLE</div>}
+                    {post.items[1] && <img src={getImageUrl(post.items[1].image)} alt="side 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    {post.items[2] ? <img src={getImageUrl(post.items[2].image)} alt="side 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: 'var(--accent-color)', fontWeight: 'bold' }}>STYLE</div>}
                   </div>
                 ) : (
-                  <img src={`http://localhost:5000${post.image}`} alt={post.title} style={{ width: '100%', height: '320px', objectFit: 'cover', borderTopLeftRadius: 'var(--radius-card)', borderTopRightRadius: 'var(--radius-card)' }} onError={(e) => { e.target.src = 'https://via.placeholder.com/400x500?text=No+Image' }} />
+                  <img src={getImageUrl(post.image)} alt={post.title} style={{ width: '100%', height: '320px', objectFit: 'cover', borderTopLeftRadius: 'var(--radius-card)', borderTopRightRadius: 'var(--radius-card)' }} onError={(e) => { e.target.src = 'https://via.placeholder.com/400x500?text=No+Image' }} />
                 )}
                 
                 <div style={{ padding: '24px' }}>
@@ -288,7 +288,7 @@ function Home() {
                             </div>
                             {items[i] && (
                               <div style={{ background: '#fafafa', padding: '20px', borderRadius: '8px' }}>
-                                <img src={`http://localhost:5000${items[i].image}`} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
+                                <img src={getImageUrl(items[i].image)} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
                                 <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>STYLING NO. {i+1}</div>
                               </div>
                             )}
@@ -297,7 +297,7 @@ function Home() {
                           <>
                             {items[i] && (
                               <div style={{ background: '#fafafa', padding: '20px', borderRadius: '8px' }}>
-                                <img src={`http://localhost:5000${items[i].image}`} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
+                                <img src={getImageUrl(items[i].image)} style={{ width: '100%', height: '500px', objectFit: 'contain' }} alt="look" />
                                 <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>STYLING NO. {i+1}</div>
                               </div>
                             )}
@@ -318,7 +318,7 @@ function Home() {
                         <div key="leftovers" style={{ display: 'grid', gridTemplateColumns: `repeat(${leftovers.length}, 1fr)`, gap: '20px' }}>
                           {leftovers.map((item, idx) => (
                             <div key={idx} style={{ background: '#fafafa', padding: '20px', borderRadius: '8px' }}>
-                               <img src={`http://localhost:5000${item.image}`} style={{ width: '100%', height: '300px', objectFit: 'contain' }} alt="look" />
+                               <img src={getImageUrl(item.image)} style={{ width: '100%', height: '300px', objectFit: 'contain' }} alt="look" />
                             </div>
                           ))}
                         </div>

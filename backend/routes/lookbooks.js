@@ -12,17 +12,7 @@ const {
 } = require('../controllers/lookbookController');
 const { protect } = require('../middleware/auth');
 const multer = require('multer');
-const path = require('path');
-
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename(req, file, cb) {
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 router.route('/')

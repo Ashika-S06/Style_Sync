@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import api from '../services/api';
+import api, { BASE_URL, getImageUrl } from '../services/api';
 import AuthContext from '../context/AuthContext';
 import { User } from 'lucide-react';
 
@@ -64,7 +64,7 @@ function Profile() {
             userLookbooks.map((post) => (
               <div key={post._id} className="glass-card" style={{ padding: '16px' }}>
                 <img 
-                  src={`http://localhost:5000${post.image}`} 
+                  src={getImageUrl(post.image)} 
                   alt={post.title} 
                   style={{ width: '100%', height: '240px', objectFit: 'cover', borderRadius: '8px', marginBottom: '16px' }}
                   onError={(e) => { e.target.src = 'https://via.placeholder.com/300x400?text=No+Image' }}

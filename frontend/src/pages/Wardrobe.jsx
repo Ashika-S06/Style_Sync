@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { BASE_URL, getImageUrl } from '../services/api';
 import { Plus, Sparkles } from 'lucide-react';
 
 function Wardrobe() {
@@ -234,7 +234,7 @@ function Wardrobe() {
             <div key={item._id} className="glass-card" style={{ padding: '0' }}>
               <div style={{ width: '100%', height: '280px', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center', borderTopLeftRadius: 'var(--radius-card)', borderTopRightRadius: 'var(--radius-card)' }}>
                 <img 
-                  src={`http://localhost:5000${item.image}`} 
+                  src={getImageUrl(item.image)} 
                   alt={item.category} 
                   style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                   onError={(e) => { e.target.src = 'https://via.placeholder.com/300x400?text=No+Image' }}

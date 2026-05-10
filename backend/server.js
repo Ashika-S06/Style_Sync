@@ -25,6 +25,13 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+if (process.env.NODE_ENV === 'production') {
+  app.use('/uploads', express.static('/tmp'));
+}
+
+app.get('/', (req, res) => {
+  res.send('Style Sync API is running...');
+});
 
 // API Routes
 const apiRouter = express.Router();

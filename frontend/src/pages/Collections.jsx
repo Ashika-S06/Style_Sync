@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
+import api, { BASE_URL, getImageUrl } from '../services/api';
 
 function Collections() {
   const [collections, setCollections] = useState([]);
@@ -117,7 +117,7 @@ function Collections() {
                     style={{ 
                       width: '80px', height: '80px', borderRadius: '8px', cursor: 'pointer',
                       border: selectedItems.includes(item._id) ? '3px solid var(--accent-color)' : '1px solid transparent',
-                      backgroundImage: `url(http://localhost:5000${item.image})`,
+                      backgroundImage: `url(${getImageUrl(item.image)})`,
                       backgroundSize: 'cover', backgroundPosition: 'center'
                     }}
                   />
@@ -146,7 +146,7 @@ function Collections() {
               <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                 {collection.items.map(item => (
                   <div key={item._id} style={{ textAlign: 'center' }}>
-                    <div style={{ width: '140px', height: '140px', borderRadius: '16px', backgroundImage: `url(http://localhost:5000${item.image})`, backgroundSize: 'cover', backgroundPosition: 'center', marginBottom: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}></div>
+                    <div style={{ width: '140px', height: '140px', borderRadius: '16px', backgroundImage: `url(${getImageUrl(item.image)})`, backgroundSize: 'cover', backgroundPosition: 'center', marginBottom: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}></div>
                     <span style={{ fontSize: '0.9rem', textTransform: 'capitalize', color: 'var(--text-main)', fontWeight: '500' }}>{item.category}</span>
                   </div>
                 ))}

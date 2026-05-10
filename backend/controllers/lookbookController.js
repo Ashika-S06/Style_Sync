@@ -9,7 +9,7 @@ const createLookbook = async (req, res) => {
       description,
       tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map(tag => tag.trim())) : [],
       items: items || [],
-      image: req.file ? '/uploads/' + req.file.filename : (image || '')
+      image: req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : (image || '')
     });
     const populated = await Lookbook.findById(lookbook._id).populate('user', 'username profilePic').populate('items').populate('comments.user', 'username profilePic');
     res.status(201).json(populated);

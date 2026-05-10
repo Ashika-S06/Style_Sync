@@ -4,7 +4,7 @@ const WardrobeItem = require('../models/WardrobeItem');
 let ai;
 try {
   if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE') {
-    ai = new GoogleGenAI({});
+    ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
   } else {
     console.warn("GEMINI_API_KEY is not set correctly. AI features may fail or return mocked data.");
   }
@@ -56,7 +56,7 @@ Return a strictly formatted JSON object (without markdown wrappers, just raw JSO
 
       try {
         const response = await ai.models.generateContent({
-            model: 'gemini-pro',
+            model: 'gemini-1.5-flash',
             contents: prompt,
             config: {
                 temperature: 0.7,
@@ -148,7 +148,7 @@ Return at most 4 trends. Do not return recommendations.`;
 
       try {
         const response = await ai.models.generateContent({
-            model: 'gemini-pro',
+            model: 'gemini-1.5-flash',
             contents: prompt,
             config: {
                 temperature: 0.7,
@@ -219,7 +219,7 @@ Return a strictly formatted JSON object (without markdown wrappers):
 
       try {
         const response = await ai.models.generateContent({
-            model: 'gemini-pro',
+            model: 'gemini-1.5-flash',
             contents: prompt,
             config: { temperature: 0.7 }
         });

@@ -19,7 +19,7 @@ const createWardrobeItem = async (req, res) => {
       color,
       brand,
       notes,
-      image: req.file ? '/uploads/' + req.file.filename : (image || '')
+      image: req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : (image || '')
     });
     
     res.status(201).json(item);
